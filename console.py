@@ -75,12 +75,12 @@ class HBNBCommand(cmd.Cmd):
                     try:
                         if type(eval(v)).__name__ == 'int':
                             v = eval(v)
-                    except:
+                    except (NameError, SyntaxError, ValueError):
                         continue
                     try:
                         if type(eval(str(v))).__name__ == 'float':
                             v = eval(v)
-                    except:
+                    except (NameError, SyntaxError, ValueError):
                         continue
                     setattr(new_instance, k, v)
             new_instance.save()
@@ -240,7 +240,7 @@ class HBNBCommand(cmd.Cmd):
             cmd_arg = args[0] + " " + args[2]
             func = functions[args[1]]
             func(cmd_arg)
-        except:
+        except (NameError, SyntaxError, ValueError):
             print("*** Unknown syntax:", args[0])
 
 
