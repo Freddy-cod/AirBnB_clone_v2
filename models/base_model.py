@@ -19,42 +19,30 @@ class BaseModel:
     updated_at = Column(DateTime, nullable=False, default=(datetime.utcnow()))
 
     def __init__(self, *args, **kwargs):
-    """Instantiation of base model class
-    Args:
-        args: it won't be used
-        kwargs: arguments for the constructor of the BaseModel
-    Attributes:
-        id: unique id generated
-        created_at: creation date
-        updated_at: updated date
-    """
-    if kwargs:
-        for key, value in kwargs.items():
-            if key == "created_at" or key == "updated_at":
-                # Ensure the value is a string before attempting to parse
-                if isinstance(value, (float, int)):  
-                    # Convert numeric timestamps to a valid string format
-                    value = datetime.utcfromtimestamp(value).isoformat()
-                elif isinstance(value, datetime):
-                    # If it's already a datetime object, don't parse
-                    pass
-                else:
-                    # Ensure the value is a string before parsing
-                    value = str(value)
-                
-                value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-
-            if key != "__class__":
-                setattr(self, key, value)
-        if "id" not in kwargs:
+        """Instantiation of base model class
+        Args:
+            args: it won't be used
+            kwargs: arguments for the constructor of the BaseModel
+        Attributes:
+            id: unique id generated
+            created_at: creation date
+            updated_at: updated date
+        """
+        if kwargs:
+            for key, value in kwargs.items():
+                if key == "created_at" or key == "updated_at":
+                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                if key != "__class__":
+                    setattr(self, key, value)
+            if "id" not in kwargs:
+                self.id = str(uuid.uuid4())
+            if "created_at" not in kwargs:
+                self.created_at = datetime.now()
+            if "updated_at" not in kwargs:
+                self.updated_at = datetime.now()
+        else:
             self.id = str(uuid.uuid4())
-        if "created_at" not in kwargs:
-            self.created_at = datetime.now()
-        if "updated_at" not in kwargs:
-            self.updated_at = datetime.now()
-    else:
-        self.id = str(uuid.uuid4())
-        self.created_at = self.updated_at = datetime.now()
+            self.created_at = self.updated_at = datetime.now()
 
     def __str__(self):
         """returns a string
