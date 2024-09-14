@@ -1,81 +1,113 @@
 #!/usr/bin/python3
+""" Module used to test  the base model """
 
-import unittest
 import os
-
-from models.place import Place
+import json
+import unittest
+import datetime
 from models.base_model import BaseModel
+from uuid import UUID
 
 
-class TestPlace(unittest.TestCase):
+class test_basemodel(unittest.TestCase):
+    """ Test class for base model """
 
-    @classmethod
-    def setUpClass(cls):
-        cls.place1 = Place()
-        cls.place1.city_id = "Somewhere in India"
-        cls.place1.user_id = "Aladdin"
-        cls.place1.name = "Taj Mahal"
-        cls.place1.description = "Fit for a king"
-        cls.place1.number_rooms = 0
-        cls.place1.number_bathrooms = 0
-        cls.place1.max_guest = 0
-        cls.place1.price_by_night = 0
-        cls.place1.latitude = 0.0
-        cls.place1.longitude = 0.0
-        cls.place1.amenity_ids = []
+    def __init__(self, *args, **kwargs):
+        """ Constructor for test_basemodel class """
+        super().__init__(*args, **kwargs)
+        self.name = 'BaseModel'
+        self.value = BaseModel
 
-    @classmethod
-    def tearDownClass(cls):
-        del cls.place1
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def setUp(self):
+        """ """
+        pass
+
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def tearDown(self):
         try:
-            os.remove("file.json")
-        except FileNotFoundError:
+            os.remove('file.json')
+        except Exception:
             pass
 
-    def test_is_subclass(self):
-        self.assertTrue(issubclass(self.place1.__class__, BaseModel), True)
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def test_default(self):
+        """ """
+        i = self.value()
+        self.assertEqual(type(i), self.value)
 
-    def test_checking_for_functions(self):
-        self.assertIsNotNone(Place.__doc__)
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def test_kwargs(self):
+        """ """
+        i = self.value()
+        copy = i.to_dict()
+        new = BaseModel(**copy)
+        self.assertFalse(new is i)
 
-    def test_has_attributes(self):
-        self.assertTrue('id' in self.place1.__dict__)
-        self.assertTrue('created_at' in self.place1.__dict__)
-        self.assertTrue('updated_at' in self.place1.__dict__)
-        self.assertTrue('city_id' in self.place1.__dict__)
-        self.assertTrue('user_id' in self.place1.__dict__)
-        self.assertTrue('name' in self.place1.__dict__)
-        self.assertTrue('description' in self.place1.__dict__)
-        self.assertTrue('number_rooms' in self.place1.__dict__)
-        self.assertTrue('number_bathrooms' in self.place1.__dict__)
-        self.assertTrue('max_guest' in self.place1.__dict__)
-        self.assertTrue('price_by_night' in self.place1.__dict__)
-        self.assertTrue('latitude' in self.place1.__dict__)
-        self.assertTrue('longitude' in self.place1.__dict__)
-        self.assertTrue('amenity_ids' in self.place1.__dict__)
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def test_kwargs_int(self):
+        """ """
+        i = self.value()
+        copy = i.to_dict()
+        copy.update({1: 2})
+        with self.assertRaises(TypeError):
+            new = BaseModel(**copy)
 
-    def test_attributes_are_strings(self):
-        self.assertEqual(type(self.place1.city_id), str)
-        self.assertEqual(type(self.place1.user_id), str)
-        self.assertEqual(type(self.place1.name), str)
-        self.assertEqual(type(self.place1.description), str)
-        self.assertEqual(type(self.place1.number_rooms), int)
-        self.assertEqual(type(self.place1.number_bathrooms), int)
-        self.assertEqual(type(self.place1.max_guest), int)
-        self.assertEqual(type(self.place1.price_by_night), int)
-        self.assertEqual(type(self.place1.latitude), float)
-        self.assertEqual(type(self.place1.longitude), float)
-        self.assertEqual(type(self.place1.amenity_ids), list)
-
-    @unittest.skipIf(
-        os.getenv('HBNB_TYPE_STORAGE') == 'db',
-        "won't work in db")
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
     def test_save(self):
-        self.place1.save()
-        self.assertNotEqual(self.place1.created_at, self.place1.updated_at)
+        """ Testing save """
+        i = self.value()
+        i.save()
+        key = self.name + "." + i.id
+        with open('file.json', 'r') as f:
+            j = json.load(f)
+            self.assertEqual(j[key], i.to_dict())
 
-    def test_to_dict(self):
-        self.assertEqual('to_dict' in dir(self.place1), True)
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def test_str(self):
+        """ """
+        i = self.value()
+        self.assertEqual(str(i), '[{}] ({}) {}'.format(self.name, i.id,
+                         i.__dict__))
+
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def test_todict(self):
+        """ """
+        i = self.value()
+        n = i.to_dict()
+        self.assertEqual(i.to_dict(), n)
+
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def test_kwargs_none(self):
+        """ """
+        n = {None: None}
+        with self.assertRaises(TypeError):
+            new = self.value(**n)
+
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def test_kwargs_one(self):
+        """ """
+        n = {'Name': 'test'}
+        new = self.value(**n)
+        self.assertRaises(KeyError)
+
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def test_id(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.id), str)
+
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def test_created_at(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.created_at), datetime.datetime)
+
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage")
+    def test_updated_at(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.updated_at), datetime.datetime)
 
 
 if __name__ == "__main__":
