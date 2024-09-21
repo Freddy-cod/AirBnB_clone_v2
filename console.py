@@ -119,6 +119,8 @@ class HBNBCommand(cmd.Cmd):
             if not args:
                 raise SyntaxError()
             arg_list = args.split(" ")
+            if arg_list[0] not in HBNBCommand.classes:
+                raise NameError()
             kw = {}
             for arg in arg_list[1:]:
                 arg_splited = arg.split("=")
@@ -128,6 +130,9 @@ class HBNBCommand(cmd.Cmd):
                                       .replace("_", " ")
                                       .replace('"', '\\"'))
                 kw[arg_splited[0]] = arg_splited[1]
+            new_instance = HBNBCommand.classes[arg_list[0]](**kw)
+            new_instance.save()
+            print(new_instance.id)
         except SyntaxError:
             print("** class name missing **")
         except NameError:
