@@ -32,9 +32,12 @@ class BaseModel:
             for key, value in kwargs.items():
                 if key == "created_at" or key == "updated_at":
                     if isinstance(value, str):
-                        value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                    elif isinstance(value, (int, float)):
-                        value = datetime.fromtimestamp(value)
+                        try:
+                            value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                        except ValueError:
+                            raise AttributeError("Error raised")
+                    else:
+                        raise AttributeError("Error raised")
                 if key != "__class__":
                     setattr(self, key, value)
             if "id" not in kwargs:
